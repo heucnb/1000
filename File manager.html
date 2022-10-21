@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>React CDN</title>
+   <!-- Font Awesome 5  Icon File -->
+
+ <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  
+<!--     
+   <link rel="stylesheet" href="http://localhost:8000/CDN/font-awesome.min.css"> -->
+    <!-- react 17 -->
+   <!-- <script src="http://localhost:8000/CDN/react.production.min.js"></script>
+   <script src="http://localhost:8000/CDN/react-dom.production.min.js"></script> -->
+    <!-- đây là bản 16 -->
+        <script src="http://localhost:8000/CDN/react.development.js"></script>
+        <script src="http://localhost:8000/CDN/react-dom.development.js"></script>
+
+   <script src='http://localhost:8000/fontend/function/hieu.js' > </script>
+ 
+   <script src='https://unpkg.com/babel-standalone@6.26.0/babel.js'></script>
+
+   <style>
+
+  
+  
+   </style>
+</head>
+<body>
+   <div id="root"></div>
+   <div id="convert_text_to_pixcel"></div>
+</body>
+
+<script  type="text/babel">
+    const { useState , useRef, useEffect  } = React ;
+let path_name = window.location.pathname ; 
+const render = () => { ReactDOM.render( <File_manager /> , document.getElementById('root'))  };
+
+function Content_mennu() {
+
+let css = {
+  
+    hover   : {   backgroundColor: '	#acac9a'  } , 
+    leave   : {   backgroundColor: 'white'  } , 
+    _row : {  width: '22%', overflow: 'hidden', whiteSpace: 'nowrap',    backgroundColor: 'inherit',  margin: '2px 5px 2px 2px', textAlign: 'start', fontSize: 16,  border: '0px solid #00A170 ',     },
+      
+  };
+          
+let ref_Content_mennu = useRef(null) ;
+             useEffect(() => {    
+
+                                      let collection = ref_Content_mennu.current.children;
+                                
+                                for (let index = 0, len = collection.length; index < len; index++) {
+
+                                  ref_Content_mennu.current.children[index].onmouseenter = function () {
+
+                                    hover(event, css.hover, css.leave , ref_Content_mennu.current.children[index]) ;
+
+                                    }
+
+                                }
+
+                                console.log( ref_Content_mennu.current.children[2]);
+
+                   //------------------------------------------------------------------------------------------------             
+                    // không dùng được onclick ở đây vì nó sẽ chạy sau onblur
+                    // khi onblur chạy Content_mennu mất nên onclick không được thực thi
+                    ref_Content_mennu.current.children[2].onmousedown = function () {
+                     
+                      let index = File_manager.ref_0_index ;
+                   
+                  
+                      File_manager.ref_0.children[index].children[0].children[1].innerHTML = ` <div    style="  position:absolute;      background-color: azure; width: inherit; height: inherit ;   white-space: nowrap;    "> ${   File_manager.ref_0.children[index].children[0].children[1].textContent }  </div>`;
+                    
+                    let div_rename = File_manager.ref_0.children[index].children[0].children[1].children[0] ;
+                   
+                    div_rename.setAttribute("contenteditable", true) ;
+              
+                    // phải setTimeout ở đây vì đợi onblur ở File_manager chạy xong đã
+                    setTimeout(() => {
+                      let range = new Range();
+                  // childNodes[0] lấy text trong div chú ý remove space
+                  // ta có thể dùng textContent 
+                    let len = div_rename.childNodes[0].length ;
+                    range.setStart(div_rename.childNodes[0], 0);
+
+                    range.setEnd(div_rename.childNodes[0], len);
+                    document.getSelection().removeAllRanges();
+                    document.getSelection().addRange(range);
+
+                    div_rename.onblur = function () {
+                    let text = div_rename.textContent ;
+                    let parent = div_rename.parentElement ;
+                    parent.innerHTML = text ;
+                    File_manager.data[index -1][0] = text ;
+                    console.log(File_manager.data);
+                    // sau đó post lên server xử lý tiếp
+
+                      }
+
+
+                    }, 0);
+                   
+                  
+                  
+
+
+                      }
+
+                  //---------------------------------------------------------------------------------------------------------------------    
+
+
+                   // không dùng được onclick ở đây vì nó sẽ chạy sau onblur
+                    // khi onblur chạy Content_mennu mất nên onclick không được thực thi
+                    ref_Content_mennu.current.children[3].onmousedown = function () {
+
+                      let index = File_manager.ref_0_index ;
+                   
+                      let div_detele = File_manager.ref_0.children[index] ;
+                      div_detele.remove();
+                     
+
+                    }
+                  }, []);
+
+        return  (<div  ref = { ref_Content_mennu}  style={ {  padding: '2px 10px 2px 10px',  boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px',}  } > 
+
+        <div  > Copy  </div>
+        <div  > Paste </div> 
+        <div  > Rename </div> 
+        <div  > Delete  </div> 
+        </div> 
+        ) ;
+        }  ; 
+  
+
+
+
+
+
+
+function File_manager() {
+
+ 
+ let [css, set_css] = useState(( )=>{  
+  return {
+       
+       flex_container : { width: '75%',   display: "flex",  boxSizing: 'border-box' ,   backgroundColor: 'white', border: '1px solid #633517 ' },
+       flex_item : {overflow: 'hidden', whiteSpace: 'nowrap',  margin: '2px 5px 2px 2px', textAlign: 'center', fontSize: 16,  border: '0px solid #00A170 ', padding: 2,  display: "flex",   },
+       title : {  alignContent: 'flex-start', alignItems: 'flex-start', overflow: 'hidden', whiteSpace: 'nowrap',   textAlign: 'start',  border: '0px solid #00A170 ', padding: 2,  display: "flex",   },
+       icon : {  display: "flex",   marginRight: 2, alignItems: 'center',} , 
+       select_file : {   width: '100%',} , 
+      
+       _row : {  width: '22%', overflow: 'hidden', whiteSpace: 'nowrap',    backgroundColor: 'inherit',  margin: '2px 5px 2px 2px', textAlign: 'start', fontSize: 16,  border: '0px solid #00A170 ',     },
+      
+       giai_thich_file   : {   position: 'absolute', top: 200, left: 300,  display: "flex",  backgroundColor: 'white',  } , 
+      content_menu   : {   position: 'absolute', top: 200, left: 300,  display: "flex",  backgroundColor: 'white',  } , 
+      hover   : {   backgroundColor: '	#acac9a'  } , 
+      leave   : {   backgroundColor: 'white' , border: '0px solid white '  } , 
+    };
+  });
+
+  
+ let [name_foder_and_file, set_state_1] = useState(( )=>{  
+  return [
+       ["foder_1_9999999999999","date_1" ,"type_1", "size"],
+       ["foder_1","date_1" ,"type_1", "size"],
+       ["foder_1","date_1" ,"type_1", "size"],
+     ["foder_1","date_1" ,"type_1", "size"],
+     ["foder_1","date_1" ,"type_1", "size"],
+     ["image_1888888888888888888888888888.jpg","date_1" ,"type_1", "size"],
+     ["image_1.jpg","date_1" ,"type_1", "size"],
+     ["image_1555555555555555555555555555555555555555.jpg","date_1" ,"type_1", "size"],
+     ["image_1.jpg","date_1" ,"type_1", "size"],
+     ["image_1.jpg","date_1" ,"type_1", "size"],
+     [ "excel_1.jpg","date_1" ,"type_1", "size"],
+     [ "excel_1.jpg","date_1" ,"type_1", "size"],
+     [ "excel_1.jpg","date_1" ,"type_1", "size"],
+     [ "excel_1.jpg","date_1" ,"type_1", "size"],
+     [ "excel_1.jpg","date_1" ,"type_1", "size"]
+ ] ;
+  });
+
+ 
+  
+    let ref_giai_thich_file =  useRef(null) ;
+    let ref_content_menu =  useRef(null) ;
+    let ref_0 =  useRef(null) ;
+  
+    let ref_bar_1 =  useRef(null) ;
+    let ref_bar_2 =  useRef(null) ;
+    let ref_bar_3 =  useRef(null) ;
+    let ref_bar_4 =  useRef(null) ;
+    let ref_bar_5 =  useRef(null) ;
+   
+   
+
+   
+        useEffect(() => {
+          File_manager.data = name_foder_and_file ;
+          window.addEventListener("contextmenu", e => e.preventDefault());
+
+        
+        
+          let myTimeout ;
+          let kiem_tra_Content_mennu = false ;
+          let index_truoc_do ;
+          let x_mouse ;
+          let y_mouse ;
+          let collection = ref_0.current.children;
+          collection[0].onmouseenter = function (event) {
+            clearTimeout(myTimeout);
+            ref_giai_thich_file.current.style.display = "none" ;
+
+          }
+         for (let index = 1, len = collection.length; index < len; index++) {
+
+          //--------------------------------------------------------------------
+            collection[index].onmouseenter = function (event) {
+              x_mouse = event.clientX ;
+              y_mouse = event.clientY ;
+              event.target.onmousemove = function (event) {
+               
+                x_mouse = event.clientX ;
+                y_mouse = event.clientY ;
+              }
+              // kiem_tra_Content_mennu === true thì không cho  onmouseenter xảy ra ở tất cả các dòng
+              if (kiem_tra_Content_mennu === false  ) {
+              //  collection[index].kiem_tra_left_mouse === true không cho  onmouseenter xảy ra ở 1 dòng 
+                  if (collection[index].kiem_tra_left_mouse === undefined) {
+                    let hover_1 = new hover(event, css.hover, css.leave , collection[index]);
+                     hover_1.tiep(index);
+
+
+                  }
+          
+              
+              }
+               
+            }
+
+           //-------------------------------------------------------------------------- 
+
+           collection[index].onmousedown = function (event) {
+
+          if (event.buttons === 1) {
+             // set tabIndex để sự kiện onblur được lắng nghe. phải đặt ngoài setTimeout để nhận tabIndex sau đó mới lắng nghe được sự kiện onblur
+             collection[index].setAttribute("tabIndex", "-1") ;
+            setTimeout(() => {
+               // xoá bỏ sự kiện onmouseleave ở dòng này
+              collection[index].onmouseleave = null ; 
+              // tô màu dòng này
+              Object.assign( collection[index].style ,{ backgroundColor: 'red' ,} , { border: '1px solid #00A170 ' }) ;
+              // xoá bỏ tô màu dòng trước đó
+              if (index_truoc_do !== undefined) {
+                Object.assign( collection[index_truoc_do].style , css.leave ) ;
+                collection[index_truoc_do].kiem_tra_left_mouse = undefined ;
+              }
+             
+
+              // điều kiện để dòng này kích hoạt
+              collection[index].kiem_tra_left_mouse = true ;
+              index_truoc_do = index ;
+             
+
+            }, 0);
+         
+
+            } 
+          if (event.buttons === 2) {
+
+            collection[index].style.backgroundColor = css.hover.backgroundColor ;
+            // xoá bỏ tô màu dòng trước đó
+            if (index_truoc_do !== undefined) {
+                Object.assign( collection[index_truoc_do].style , css.leave ) ;
+                collection[index_truoc_do].kiem_tra_left_mouse = undefined ;
+              }
+            
+            // xoá bỏ sự kiện onmouseleave ở dòng này
+            if ( typeof collection[index].onmouseleave === "function") {
+            
+              collection[index].onmouseleave = null ; 
+            }
+            // tô màu dòng này
+            Object.assign( collection[index].style ,{ backgroundColor: 'red' ,} , { border: '1px solid #00A170 ' }) ;
+            ref_giai_thich_file.current.style.display = "none" ;
+
+            // Hiển thị Content_mennu
+            // set tabIndex để sự kiện onblur được lắng nghe
+            collection[index].setAttribute("tabIndex", "-1") ;
+        
+                                  
+                                    let  _top  = y_mouse+ 'px' ;
+                                  
+                                     let left = x_mouse  + 'px';
+
+             setTimeout(() => {
+
+              File_manager.ref_0 =  ref_0.current ;
+              File_manager.ref_0_index = index ;
+              Object.assign(ref_content_menu.current.style , css.content_menu , { top:_top, left : left }) ;
+         
+            ReactDOM.render( <Content_mennu />  ,  ref_content_menu.current) ;
+            kiem_tra_Content_mennu = true ; 
+             // điều kiện để dòng này kích hoạt
+             collection[index].kiem_tra_left_mouse = true ;
+              index_truoc_do = index ;
+             }, 0);                     
+            
+          
+
+          }
+
+       
+        }
+
+        //---------------------------------------------------------------------
+
+            collection[index].onblur = function (event) {
+              console.log('onblur');
+              
+              Object.assign( collection[index].style , css.leave  ) ;
+              ref_content_menu.current.style.display = 'none' ;
+              kiem_tra_Content_mennu = false ;
+              collection[index].kiem_tra_left_mouse = undefined ;
+              index_truoc_do = undefined ;
+
+            }
+
+         //--------------------------------------------------------------------------   
+
+          }
+
+  
+
+
+/////////////////////////////////////////////////////////////////////////
+ref_bar_1.current.onmouseenter = function (event) {
+  hover(event, css.hover, css.leave , ref_bar_1.current) ;
+}
+
+ref_bar_1.current.onclick = function create_folder(event) {
+ 
+set_state_1( ( name_foder_and_file )=>{
+  let  name_foder_and_file_update = [["foder_new","date_115/10/2022" ,"type_1", "size"]].concat(name_foder_and_file);
+  return name_foder_and_file_update  ;} ) ;
+  
+  ref_0.current.children[1].children[0].children[1].innerHTML = ` <div    style="  position:absolute;      background-color: azure; width: inherit; height: inherit ;   white-space: nowrap;    "> ${  name_foder_and_file[0][0] }  </div>`;
+    
+  let div_rename = ref_0.current.children[1].children[0].children[1].children[0] ;
+
+  div_rename.setAttribute("contenteditable", true) ;
+ 
+ 
+  let range = new Range();
+ // childNodes[0] lấy text trong div chú ý remove space
+ // ta có thể dùng textContent 
+  let len = div_rename.childNodes[0].length ;
+  range.setStart(div_rename.childNodes[0], 0);
+
+  range.setEnd(div_rename.childNodes[0], len);
+  document.getSelection().removeAllRanges();
+  document.getSelection().addRange(range);
+//--------------------------------------------------
+  div_rename.onblur = function () {
+
+  
+    let text = div_rename.textContent ;
+   
+    set_state_1( ( name_foder_and_file )=>{
+  let  name_foder_and_file_update = [].concat(File_manager.data);
+  name_foder_and_file_update[0][0] = text ;
+
+  File_manager.data =  name_foder_and_file_update ;
+
+  return name_foder_and_file_update  ;} ) ;
+
+ 
+  
+  }
+
+ 
+}
+
+////////////////////////////////////////////////////////////////////////
+ref_bar_2.current.onmouseenter = function (event) {
+  hover(event, css.hover, css.leave , ref_bar_2.current) ;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+ref_bar_3.current.onmouseenter = function (event) {
+  hover(event, css.hover, css.leave , ref_bar_3.current) ;
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+ref_bar_4.current.onmouseenter = function (event) {
+  hover(event, css.hover, css.leave , ref_bar_4.current) ;
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+ref_bar_5.current.onmouseenter = function (event) {
+  hover(event, css.hover, css.leave , ref_bar_5.current) ;
+}
+////////////////////////////////////////////////////////////////////////
+hover.prototype.tiep = function(i ){
+        // chú ý lỗi trong react 16
+        //Method Object.freeze() giúp chúng ta chuyển một object thông thường sang trạng thái không thể modified(sửa đổi).
+        // trong react Object cấp 2 sẽ bị Object.freeze()
+        // có thể dùng hàm Object.isFrozen(css.giai_thich_file) để kiểm tra nó sẽ trả về true
+        // muốn truy cập để sửa đổi được ta phải tạo một bản copy bằng cách dùng hàm Object.assign()
+        // vd  Object.assign({}, css.giai_thich_file ,{top: _top},) sủa đổi luôn
+        // hoặc sau khi tạo bản copy rồi ta có thể sửa css.giai_thich_file.left = x_mouse - 20 + 'px'; được nhưng trước đó ta phải tạo bản copy
+        
+      
+
+                            
+                              function Giai_thich_file() {
+
+                                                                    
+
+                                return  (<div style={ {  padding: '2px 10px 2px 10px',  boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px',}  } > 
+                                
+                                <div  > { name_foder_and_file[index][0]}  </div>
+                                <div  > {name_foder_and_file[index][1] } </div> 
+                                <div  > { name_foder_and_file[index][2]}  </div> 
+                                <div  > { name_foder_and_file[index][3]}  </div> 
+                                </div> 
+                                ) ;
+                                }  ; 
+
+                             
+                                    clearTimeout(myTimeout);
+                                ref_giai_thich_file.current.style.display = "none" ;
+                          
+                                    let index = i ; 
+                                 
+                                    
+                              
+                                    let _top  = ref_0.current.children[ index  ].getBoundingClientRect().y + 25 + 'px' ;
+                                        css.giai_thich_file =   Object.assign({}, css.giai_thich_file ,{top: _top},) ;
+                                  
+                            
+                                    css.giai_thich_file.left = x_mouse - 20 + 'px';
+                            
+                                 
+                                       myTimeout =   setTimeout(() => {
+                                            
+                                         let  max_x_mouse =  ref_0.current.children[ index  ].children[ 1].getBoundingClientRect().x  ; 
+                                    
+                                            let width_col_name = ref_0.current.children[  index  ].children[ 0].getBoundingClientRect().width ; 
+                                            let width_icon = ref_0.current.children[  index  ].children[ 0].children[ 0].getBoundingClientRect().width ;
+                                           if (x_mouse < max_x_mouse &&( convert_text_to_pixcel(name_foder_and_file[index-1][0]) + width_icon)  >= width_col_name ) {
+                                            Object.assign(ref_giai_thich_file.current.style , css.giai_thich_file) ;
+                                              ReactDOM.render( <Giai_thich_file />  ,  ref_giai_thich_file.current) ;
+                                           } 
+                                            
+                                        }, 200);
+  
+        };
+         
+////////////////////////////////////////////////////////////////////////
+
+
+
+        }, [name_foder_and_file]);
+   return (<div   >
+
+
+   
+<div ref = { ref_giai_thich_file } >   </div>
+<div ref = { ref_content_menu } >   </div>
+<div style={css.flex_container} >
+  
+  <div ref = { ref_bar_1 } style={css.flex_item}  > <div    style={css.icon} className={' far fa fa-file '} > </div>   <div style={css.title}  > New folder   </div>    </div>
+  <div ref = { ref_bar_2 } style={css.flex_item}    > <div    style={css.icon} className={' fa fa-upload'} > </div>  <div  style={css.title}  >  Upload  </div>  </div>
+  <div ref = { ref_bar_3 } style={css.flex_item}    > <div    style={css.icon} className={' far fa fa-sort '} > </div>   <div   style={css.title}  >  Srort by  </div>  </div>  
+  <div  ref = { ref_bar_4 } style={css.flex_item}    > <div    style={css.icon} className={' far fa fa-file '} > </div>    <div style={css.title}   >  Wiew </div>   </div>
+  <div ref = { ref_bar_5 }  style={Object.assign({},css.flex_item,  {  flexGrow: 4})}    > <div    style={css.icon} className={' far fa-folder-open '} > </div>   <div style={css.title}   > Thông báo   </div></div>
+
+</div>
+<div ref = { ref_0 } style={  Object.assign(  {}, css.flex_container , {flexWrap: 'wrap', height: '75vh',   alignContent: 'flex-start',  overflow: 'auto',}  )  } >  
+    <div style={{ display: "flex",    width: '100%'}}      >
+       
+         <div style={  css._row  } > Name </div> 
+         <div style={  css._row  } >  Date modified  </div> 
+         <div style={   css._row   } > Type </div> 
+         <div style={  Object.assign({},css._row,  {  flexGrow: 4})   } >  Size  </div> 
+    </div>
+
+  {
+    name_foder_and_file.map( ( i, index )=>{ 
+         return <div  data-index = {index } style={{  backgroundColor: 'white', display: "flex",   width: '100%', boxSizing: 'border-box' , paddingLeft: 2}}     >
+         
+                   
+                    <div  style={ Object.assign({},css._row,  {  display: "flex",   boxSizing: 'border-box', })   } >      <div    style={css.icon} className={' far fa fa-file '} > </div>  <div  >{i[0]}</div>                </div>
+                    <div style={  css._row  } >  {i[1]}  </div> 
+                    <div style={   css._row   } >  {i[2]}  </div> 
+                    <div style={  Object.assign({},css._row,  {  flexGrow: 4})   } >  {i[3]}  </div> 
+        </div>   } )
+    
+  }  
+    
+</div>
+
+    
+   </div>
+
+   
+
+   )
+}
+
+
+
+render();
+</script>
+</html>
